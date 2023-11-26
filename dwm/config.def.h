@@ -3,15 +3,16 @@
 /* appearance */
 static const unsigned int borderpx  = 4;        /* border pixel of windows */
 static const unsigned int snap      = 32;       /* snap pixel */
-static const unsigned int gappx     = 6;        /* gaps between windows */
+static const unsigned int gappx     = 8;        /* gaps between windows */
 static const int showbar            = 1;        /* 0 means no bar */
 static const int topbar             = 1;        /* 0 means bottom bar */
+static const int splitstatus        = 0;        /* 1 for split status items */
+static const char *splitdelim        = ";";       /* Character used for separating status */
 
-#define TERMINAL "alacritty"
+#define TERMINAL "st"
+static const char *fonts[] = { "SauceCodePro Nerd Font:size=12:antialias=true:autohint=true:style=Bold" };
 
-
-static const char *fonts[]          = {"dejavu-ib:size=11","Ubuntu:weight=bold:size=8:antialias=true:hinting=true","JoyPixels:size=10:antialias=true:autohint=true"};
-static const char dmenufont[]       = "dejavu-ib:size=11";
+static const char dmenufont[]       = "dejavu-ib:size=12";
 static const char col_gray1[]       = "#222222";
 static const char col_gray2[]       = "#444444";
 static const char col_gray3[]       = "#bbbbbb";
@@ -24,9 +25,7 @@ static const char *colors[][3]      = {
 };
 
 /* tagging */
-static const char *tags[] = {"Web","Term","Apps", "Music", "Video","Random"};
-
-
+static char *tags[] = {"cmd", "www", "dev","Msc","chat","Vid"};
 
 static const Rule rules[] = {
 	/* xprop(1):
@@ -34,8 +33,6 @@ static const Rule rules[] = {
 	 *	WM_NAME(STRING) = title
 	 */
 	/* class      instance    title       tags mask     isfloating   monitor */
-	{ "Thunar",     NULL,       NULL,   1 << 2,            0,          -1 },
-	{ "nemo",     NULL,       NULL,       0,            1,           -1 },
 	{ "Firefox",  NULL,       NULL,       1 << 8,       0,           -1 },
 };
 
@@ -72,7 +69,7 @@ static const Layout layouts[] = {
 /* commands */
 static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
 static const char *dmenucmd[] = { "dmenu_run","-m",dmenumon,NULL };
-static const char *termcmd[]  = { "alacritty", NULL };
+static const char *termcmd[]  = { "st", NULL };
 
 
 
@@ -81,42 +78,38 @@ static const  Key keys[] = {
 	/* modifier                     key        function        argument */
 	{ MODKEY,                       XK_p,      spawn,          {.v = dmenucmd } },
 	{ MODKEY,                       XK_Return, spawn,          {.v = termcmd } },
-	{ MODKEY,                       XK_b,      togglebar,      {0} },
+	{ MODKEY|ShiftMask,             XK_b,      togglebar,      {0} },
 	{ MODKEY,                       XK_j,      focusstack,     {.i = +1 } },
 	{ MODKEY,                       XK_k,      focusstack,     {.i = -1 } },
 	{ MODKEY,                       XK_i,      incnmaster,     {.i = +1 } },
 	{ MODKEY,                       XK_d,      incnmaster,     {.i = -1 } },
 	{ MODKEY,                       XK_h,      setmfact,       {.f = -0.05} },
 	{ MODKEY,                       XK_l,      setmfact,       {.f = +0.05} },
-	{ MODKEY,                       XK_z, 	   zoom,           {0} },
+	{ MODKEY|ShiftMask,             XK_Return, zoom,           {0} },
 	{ MODKEY,                       XK_Tab,    view,           {0} },
-	{ MODKEY,	                XK_q,      killclient,     {0} },
-	{ MODKEY,                       XK_t,      setlayout,      {.v = &layouts[0]} },
-	{ MODKEY,                       XK_f,      setlayout,      {.v = &layouts[1]} },
-	{ MODKEY,                       XK_m,      setlayout,      {.v = &layouts[2]} },
-	{ MODKEY,                       XK_u,      setlayout,      {.v = &layouts[3]} },
-	{ MODKEY,                       XK_o,      setlayout,      {.v = &layouts[4]} },
-	{ MODKEY,                       XK_space,  setlayout,      {0} },
-	{ MODKEY|ShiftMask,             XK_space,  togglefloating, {0} },
-	{ MODKEY,                       XK_KP_Insert,      view,           {.ui = ~0 } },
-	{ MODKEY|ShiftMask,             XK_KP_Insert,      tag,            {.ui = ~0 } },
+	{ MODKEY|ShiftMask, 	        XK_q,      killclient,     {0} },
+	{ MODKEY|ShiftMask,             XK_t,      setlayout,      {.v = &layouts[0]} },
+	{ MODKEY|ShiftMask,             XK_f,      setlayout,      {.v = &layouts[1]} },
+	{ MODKEY|ShiftMask,             XK_m,      setlayout,      {.v = &layouts[2]} },
+	{ MODKEY|ShiftMask,             XK_u,      setlayout,      {.v = &layouts[3]} },
+	{ MODKEY|ShiftMask,             XK_o,      setlayout,      {.v = &layouts[4]} },
 	{ MODKEY,                       XK_Left,   viewtoleft,     {0} },
 	{ MODKEY,                       XK_Right,  viewtoright,    {0} },
-	{ MODKEY|ShiftMask,             XK_Left,   tagtoleft,      {0} },
-	{ MODKEY|ShiftMask,             XK_Right,  tagtoright,     {0} },
+	{ MODKEY|ShiftMask,             XK_parenright,   tagtoleft,      {0} },
+	{ MODKEY|ShiftMask,             XK_equal,  tagtoright,     {0} },
 	{ MODKEY,                       XK_comma,  focusmon,       {.i = -1 } },
 	{ MODKEY,                       XK_period, focusmon,       {.i = +1 } },
 	{ MODKEY|ShiftMask,             XK_comma,  tagmon,         {.i = -1 } },
 	{ MODKEY|ShiftMask,             XK_period, tagmon,         {.i = +1 } },
 	{ MODKEY|ShiftMask,		XK_w,		spawn,		{.v = (const char*[]){ TERMINAL, "-e", "sudo", "nmtui", NULL } } },
 
-	TAGKEYS(                        XK_KP_End,                      0)
-	TAGKEYS(                        XK_KP_Down,                      1)
-	TAGKEYS(                        XK_KP_Next,                      2)
-	TAGKEYS(                        XK_KP_Left,                      3)
-	TAGKEYS(                        XK_KP_Begin,                      4)
-	TAGKEYS(                        XK_KP_Right,                      5)
-	{ MODKEY|ControlMask,           XK_q,      quit,           {0} },
+	TAGKEYS(                        XK_ampersand,                      0)
+	TAGKEYS(                        XK_eacute,                      1)
+	TAGKEYS(                        XK_quotedbl,                      2)
+	TAGKEYS(                        XK_apostrophe,                      3)
+	TAGKEYS(                        XK_parenleft,                      4)
+	TAGKEYS(                        XK_minus,                      5)
+	{ MODKEY|ShiftMask|ControlMask,           XK_q,      quit,           {0} },
 
         
 };

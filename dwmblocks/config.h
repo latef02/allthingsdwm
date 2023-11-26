@@ -3,15 +3,17 @@ static const Block blocks[] = {
 
 /*Icon*/	/*Command*/		/*Update Interval*/	/*Update Signal*/
   
-  {"",  "packages",  1,  16}, 
-  {"",  "memory", 1,  10},
-  {"",  "internet",  60, 1},
+  {"",  "packages",  18000,  16}, 
+  {"",  "update",  18000,  16},
+  {"",  "memory", 2,  10},
+  {"",  "internet",  10, 1},
   {"",  "cpu", 5,  4},
-  {"",  "clocks", 5,  4},
+  {"",  "fan", 1,  16},
+  {"",  "clocks", 60,  4},
   {"",  "xback", 1,  16},
-  {"",  "batterychecks", 5,  4},
+  {"",  "batterychecks", 10,  4},
   {"",  "vol", 1,  16},
-};
+ };
 
 //sets delimeter between status commands. NULL character ('\0') means no delimeter.
 static char delim[] = " | ";
